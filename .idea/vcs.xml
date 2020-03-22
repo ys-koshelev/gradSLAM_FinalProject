@@ -2,10 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/forked/KinectFusionLib" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/forked/KinectFusion_OpenCL" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/forked/Kintinuous" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/forked/slambench2" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/forked/tsdf-fusion-python" vcs="Git" />
   </component>
 </project>
