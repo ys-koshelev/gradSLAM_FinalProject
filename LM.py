@@ -1,5 +1,4 @@
 import torch as th
-import numpy as np
 
 class PoseFunctionBase:
     def __init__(self, x, params_shape):
@@ -12,10 +11,13 @@ class PoseFunctionBase:
     def jacobian(self):
         pass
 
+    def evaluate(self):
+        pass
+
     def update_params(self, deltas):
         assert self.params.shape == deltas.shape, "Shapes of parameters and updates are different."
 
-        self.params += deltas
+        self.params = self.params + deltas
         pass
 
     @property
@@ -27,24 +29,8 @@ class PoseFunctionBase:
         return self.jacobian()
 
 
-class SinFunction(PoseFunctionBase):
-    def __init__(self, x):
-        self.x = x
-        self.params = th.rand(4)
-
-    def value(self):
-        return self.params[0]*th.sin(self.params[1]*self.x + self.params[2]) + self.params[3]
-
-    def jacobian(self):
-        J = th.stack([th.sin(self.params[1]*self.x + self.params[2]),
-                      self.params[0]*self.x*th.cos(self.params[1]*self.x + self.params[2]),
-                      self.params[0]*th.cos(self.params[1]*self.x + self.params[2]),
-                      th.ones_like(self.x)], dim=1)
-        return J
-
-
 class DampingFunction:
-    def __init__(self, lam_max, lam_min, D, sigma):
+    def __init__(self, lam_min, lam_max, D, sigma):
         self.lam_max = lam_max
         self.lam_min = lam_min
         self.D = D
