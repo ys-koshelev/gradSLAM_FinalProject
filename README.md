@@ -3,7 +3,7 @@ Repo with our gradSLAM realization as a final project for Perception In Robotics
 
 ## Grad Levenberg–Marquardt branch:
 Look into LM.py for base classes and solver. Look into test_exp.py and test_sin.py to investigate realization of basic 
-functions fitting (exp and sin corresponingly). To see how it works, just do:
+functions fitting (exp and sin correspondingly). To see how it works, just do:
 
 python test_exp.py
 
