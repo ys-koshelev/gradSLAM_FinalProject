@@ -1,10 +1,10 @@
 import torch as th
 import numpy as np
-improt json
+import json
 import cv2
 
 def load_intrinsics_from_file(file_path):
-    assert filename[-4:] == 'json', 'Only json files are allowed.'
+    assert file_path[-4:] == 'json', 'Only json files are allowed.'
     with open(file_path) as json_file:
         data = json.load(json_file)['intrinsic_matrix']
     I = th.zeros(3, 3)
