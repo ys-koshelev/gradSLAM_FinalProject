@@ -12,13 +12,16 @@ class ExpFunction(PoseFunctionBase):
             self.params = init_params
 
     def value(self):
-        return self.params[0] * th.exp(self.params[1] * self.x + self.params[2]) + self.params[3]
+        v = self.params[0] * th.exp(self.params[1] * self.x + self.params[2]) + self.params[3]
+        print('evaluate: ', v.shape)
+        return v
 
     def jacobian(self):
         J = th.stack([th.exp(self.params[1] * self.x + self.params[2]),
                       self.params[0] * self.x * th.exp(self.params[1] * self.x + self.params[2]),
                       self.params[0] * th.exp(self.params[1] * self.x + self.params[2]),
                       th.ones_like(self.x)], dim=1)
+        print('Jac: ', J.shape)
         return J
 
     def evaluate(self, x):

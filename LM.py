@@ -70,7 +70,7 @@ class DiffLM:
         deltas = th.inverse(lhs)@rhs
         return deltas
 
-    def optimize(self):
+    def optimize(self, verbose=False):
         lam = self.decision_function.lam_max
         r0 = self.r_abs
         r1 = r0.clone()
@@ -86,5 +86,10 @@ class DiffLM:
             r0 = r1.clone()
             r1 = self.r_abs
             lam = self.decision_function.Qlam(r0, r1)
+            if verbose:
+                print('Deltas: ', deltas)
+                print('r_0: ', r0)
+                print('r_1: ', r1)
+                print('\n')
         print('Did not converge with required tolerance.')
         return self.function
