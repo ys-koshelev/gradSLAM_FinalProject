@@ -7,6 +7,7 @@ class Cloud:
         self.intrinsic = None
         self.depth = None
         self.extrinsic = None
+        self.mask = None
 
 
     def from_depth_file(self, path_to_depth, path_to_intrinsic, path_to_extrinsic, ignore='max'):
@@ -14,7 +15,7 @@ class Cloud:
         self.depth = depth
         self.intrinsic = load_matrix_synthetic(path_to_intrinsic)
         self.extrinsic = load_matrix_synthetic(path_to_extrinsic)
-        self.points = self.extrude_cloud(depth, ignore)
+        self.points, self.mask = self.extrude_cloud(depth, ignore)
         return self
 
 
@@ -40,8 +41,9 @@ class Cloud:
 
         projected = th.bmm(self.intrinsic.unsqueeze(0).expand(self.points.shape[0], 3, 3),
                            self.points.unsqueeze(-1)).squeeze(-1)
-        projected = projected[:, :, :2]/projected[:, :, 2, None]
+        projected = projected[:, :2]/projected[:, 2, None]
         return projected
+
 
     def extrude_cloud(self, dpth, ignore=None):
         Intr = self.intrinsic
@@ -52,6 +54,7 @@ class Cloud:
         uv = th.cat([uv, dpth[..., None]], dim=-1).flatten(start_dim=0, end_dim=1).unsqueeze(-1)
         M = M.unsqueeze(0).expand(uv.shape[0], 3, 3)
         xyz = th.bmm(M, uv).squeeze(-1)
+        mask = None
         if ignore is not None:
             if isinstance(ignore, th.Tensor):
                 mask_coeff = ignore.squeeze()
@@ -63,7 +66,7 @@ class Cloud:
                 raise ValueError('Unknown ignore type. Only min, max or float number are accepted.')
             mask = (xyz[:, 2] != mask_coeff)
             xyz = xyz[mask]
-        return xyz
+        return xyz, mask
 
 
 def get_coords_list(H, W):
