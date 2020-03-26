@@ -66,7 +66,7 @@ class DiffLM:
         J = self.function.J
         r = self.r
         rhs = J.T@r
-        lhs = J.T@J + lam*(th.eye(J.shape[-1]).type_as(J))
+        lhs = J.T@J + lam*th.eye(J.shape[-1]).type_as(J)
         deltas = th.inverse(lhs)@rhs
         return deltas
 
