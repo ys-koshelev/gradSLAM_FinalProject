@@ -8,6 +8,7 @@ class Cloud:
         self.depth = None
         self.extrinsic = None
         self.mask = None
+        self.unmasked_points = None
 
 
     def from_depth_file(self, path_to_depth, path_to_intrinsic, path_to_extrinsic, ignore='max'):
@@ -15,7 +16,8 @@ class Cloud:
         self.depth = depth
         self.intrinsic = load_matrix_synthetic(path_to_intrinsic)
         self.extrinsic = load_matrix_synthetic(path_to_extrinsic)
-        self.points, self.mask = self.extrude_cloud(depth, ignore)
+        self.unmasked_points, self.mask = self.extrude_cloud(depth, ignore)
+        self.points = self.unmasked_points[self.mask]
         return self
 
 
@@ -35,8 +37,8 @@ class Cloud:
 
     @property
     def project(self):
-        assert self.points != None, 'Cloud is not initialized properly. Consider calling from_depth_file.'
-        assert self.intrinsic != None, 'Intrinsics not found. Guess cloud is not initialized properly. ' \
+        assert self.points is not None, 'Cloud is not initialized properly. Consider calling from_depth_file.'
+        assert self.intrinsic is not None, 'Intrinsics not found. Guess cloud is not initialized properly. ' \
                                        'Consider calling from_depth_file.'
 
         projected = th.bmm(self.intrinsic.unsqueeze(0).expand(self.points.shape[0], 3, 3),
@@ -65,7 +67,8 @@ class Cloud:
             else:
                 raise ValueError('Unknown ignore type. Only min, max or float number are accepted.')
             mask = (xyz[:, 2] != mask_coeff)
-            xyz = xyz[mask]
+
+        # return all points, unmasked
         return xyz, mask
 
 
