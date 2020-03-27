@@ -56,6 +56,12 @@ def create_rot_from_angle(angle):
 
 
 def transform_pc(x, rot, transl):
+    """
+        Args:
+            x (torch.Tensor): point cloud X. Shape: (N, 3)
+            rot (torch.Tensor): SO(3) rota. Shape: (3, 3)
+            transl (torch.Tensor): translation + SO(3). Shape: (3)
+    """
     return torch.bmm(x.unsqueeze(1), rot.T.unsqueeze(0).repeat(x.size(0),1,1)) + transl
 
 
