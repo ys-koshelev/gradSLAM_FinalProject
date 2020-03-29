@@ -19,18 +19,18 @@ def load_intrinsics_real(file_path):
 
 
 def load_matrix_synthetic(path):
-    ret = np.loadtxt(path)
-    ret = th.Tensor(ret)
+    ret = np.loadtxt(path, dtype=np.float64)
+    ret = th.DoubleTensor(ret)
     return ret
 
 
 def load_depth_synthetic(depth_path):
     depth = np.load(depth_path)
-    return th.Tensor(depth).squeeze()
+    return th.Tensor(depth).squeeze().double()
 
 
 def load_depth_synthetic_old(depth_path, minmax_path):
-    depth = cv2.imread(depth_path, cv2.IMREAD_GRAYSCALE).astype(float) / 255.
-    max_depth, min_depth = np.loadtxt(minmax_path)
+    depth = cv2.imread(depth_path, cv2.IMREAD_GRAYSCALE).astype(double) / 255.
+    max_depth, min_depth = np.loadtxt(minmax_path, dtype=np.float64)
     depth = depth * (max_depth - min_depth) + min_depth
     return th.Tensor(depth)

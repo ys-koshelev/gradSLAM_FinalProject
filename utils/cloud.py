@@ -73,5 +73,5 @@ class Cloud:
 
 
 def get_coords_list(H, W):
-    uv = th.flip(th.stack(th.meshgrid(th.arange(H), th.arange(W)), axis=-1).float(), (-1,))
+    uv = th.flip(th.stack(th.meshgrid(th.arange(H), th.arange(W)), axis=-1).double(), (-1,))
     return uv
