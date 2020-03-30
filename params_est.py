@@ -4,6 +4,8 @@ import torch
 import copy
 
 import numpy as np
+import scipy as sp
+import scipy.spatial
 from utils.cloud import Cloud
 
 # path_to_depth = '../stylized-ww01-plane/blender_render_depth4/1.npy'
@@ -54,6 +56,37 @@ def optim_step_ICP(pc1, pc2, params_old=None, max_iter=1000, icp_max_iter=30, ve
                                                 criteria=o3d.registration.ICPConvergenceCriteria(max_iteration=icp_max_iter))
 
     pc1_idx, pc2_idx = np.asarray(reg_p2l.correspondence_set).T
+
+    x = pc1.points[pc1_idx]
+    y = pc2.points[pc2_idx]
+
+    if params_old is None:
+        params_old = torch.DoubleTensor(6).fill_(0)
+    print('Extrinsics estimation...')
+    params = align_pc(x.double(), y.double(), params_old, lam_min=0.01, lam_max=1, D=1, sigma=1e-5, max_iter=max_iter, verbose=verbose)
+    return params
+
+
+def optim_step_neighbors(pc1, pc2, params_old=None, max_iter=1000, neighbors_take_each=1000, verbose=0):
+    R = pc2.extrinsic @ torch.inverse(pc1.extrinsic)
+    rot = R[:3,:3]
+    transl = R[:3,-1]
+
+    pcA = o3d.geometry.PointCloud()
+    pcA.points = o3d.utility.Vector3dVector(pc1.points.detach())
+
+    pcB = o3d.geometry.PointCloud()
+    pcB.points = o3d.utility.Vector3dVector(pc2.points.detach())
+
+    print('Correspondence set estimation...')
+    n_pts_A = len(pc1.points.cpu().data.numpy())
+    pcA_pts_subset = pc1.points.cpu().data.numpy()[::neighbors_take_each]
+    pcB_pts = pc2.points.cpu().data.numpy()
+    cdist = sp.spatial.distance.cdist(pcA_pts_subset, pcB_pts)
+    reg_p2l = np.argmin(cdist, axis=1)
+    
+    pc1_idx = np.arange(n_pts_A)[::neighbors_take_each]
+    pc2_idx = reg_p2l
 
     x = pc1.points[pc1_idx]
     y = pc2.points[pc2_idx]
