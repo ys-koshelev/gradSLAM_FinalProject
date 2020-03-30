@@ -10,16 +10,28 @@ class Cloud:
         self.mask = None
         self.unmasked_points = None
 
-
-    def from_depth_file(self, path_to_depth, path_to_intrinsic, path_to_extrinsic, ignore='max'):
+    @staticmethod
+    def from_depth_file(path_to_depth, path_to_intrinsic, path_to_extrinsic, ignore='max'):
         depth = load_depth_synthetic(path_to_depth)
-        self.depth = depth
-        self.intrinsic = load_matrix_synthetic(path_to_intrinsic)
-        self.extrinsic = load_matrix_synthetic(path_to_extrinsic)
-        self.unmasked_points, self.mask = self.extrude_cloud(depth, ignore)
-        self.points = self.unmasked_points[self.mask]
+        intrinsic = load_matrix_synthetic(path_to_intrinsic)
+        extrinsic = load_matrix_synthetic(path_to_extrinsic)
+        self = Cloud.from_tensors(depth, intrinsic, extrinsic, ignore=ignore)
         return self
-
+    
+    def update_data(self, depth, intrinsic, extrinsic, ignore='max'):
+        self.depth = depth
+        self.intrinsic = intrinsic
+        self.extrinsic = extrinsic
+        self.unmasked_points, self.mask = self.extrude_cloud(depth, ignore)
+        self.points = self.unmasked_points[self.mask]    
+        
+    @staticmethod
+    def from_tensors(depth, intrinsic, extrinsic, ignore='max'):
+        if len(depth.shape) == 2:
+            depth = depth.squeeze()
+        self = Cloud()
+        self.update_data(depth, intrinsic, extrinsic, ignore)
+        return self
 
     def transform(self, T):
         ret = th.cat((self.points, th.ones_like(self.points[:, :1])), dim=-1).unsqueeze(-1)
@@ -28,12 +40,10 @@ class Cloud:
         if ret.shape[-1] == 4:
             ret = ret[:, :3]
         return ret
-
-
+        
     @property
     def align(self):
         return self.transform(th.inverse(self.extrinsic))
-
 
     @property
     def project(self):
@@ -45,7 +55,6 @@ class Cloud:
                            self.points.unsqueeze(-1)).squeeze(-1)
         projected = projected[:, :2]/projected[:, 2, None]
         return projected
-
 
     def extrude_cloud(self, dpth, ignore=None):
         Intr = self.intrinsic
