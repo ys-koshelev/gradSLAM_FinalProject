@@ -36,7 +36,7 @@ y.requires_grad = True
 # Fit using implemented differentiable LM
 s = ExpFunction(x, init_params=th.ones(4))
 d = DampingFunction(lam_min=0.1, lam_max=1, D=1, sigma=1e-5)
-solver = DiffLM(y=y, function=s, decision_function=d, tol=1e-3, max_iter=100)
+solver = DiffLM(y=y, function=s, decision_function=d, tol=1e-3, max_iter=1000)
 f = solver.optimize()
 
 # Check the gradients
@@ -50,5 +50,8 @@ x_fit = th.linspace(0, 1, 1000)
 y_fit = f.evaluate(x_fit)
 plt.plot(x, y.detach(), '.', label='Input noisy data')
 plt.plot(x_fit.detach(), y_fit.detach(), label='Fitted curve')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.title('f(x) = a exp(bx + c) + d + N(0, 1/5)')
 plt.legend()
 plt.show()
