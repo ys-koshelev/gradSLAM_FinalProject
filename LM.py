@@ -1,4 +1,6 @@
 import torch as th
+from tqdm import tqdm
+
 
 class PoseFunctionBase:
     def __init__(self, x, params_shape):
@@ -70,11 +72,14 @@ class DiffLM:
         deltas = th.inverse(lhs)@rhs
         return deltas
 
-    def optimize(self, verbose=False):
+    def optimize(self, verbose=0):
         lam = self.decision_function.lam_max
         r0 = self.r_abs
         r1 = r0.clone()
-
+        
+        iterations = range(self.max_iter)
+        if verbose == 1:
+            iterations = tqdm(iterations)
         for i in range(self.max_iter):
             deltas = self.step(lam)
             step = self.decision_function.Qx(deltas, r0, r1)
@@ -86,7 +91,7 @@ class DiffLM:
             r0 = r1.clone()
             r1 = self.r_abs
             lam = self.decision_function.Qlam(r0, r1)
-            if verbose:
+            if verbose >= 2:
                 print('Deltas: ', deltas)
                 print('r_0: ', r0)
                 print('r_1: ', r1)

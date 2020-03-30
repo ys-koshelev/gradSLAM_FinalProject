@@ -65,6 +65,18 @@ def transform_pc(x, rot, transl):
     return torch.bmm(x.unsqueeze(1), rot.T.unsqueeze(0).repeat(x.size(0),1,1)) + transl
 
 
+def extrinsics_from_rot_transl(rot, transl):
+    """
+        Args:
+            rot (torch.Tensor): SO(3) rota. Shape: (3, 3)
+            transl (torch.Tensor): translation + SO(3). Shape: (3)
+    """
+    T = torch.cat([rot, transl.unsqueeze(1)], dim=1)
+    T = torch.cat([T, torch.zeros_like(T[[0]])], dim=0)
+    T[-1, -1] = 1
+    return T
+
+
 def get_J(x, y, params):
     transl, angle = params.split([3,3], dim=-1)
     rot = create_rot_from_angle(angle.unsqueeze(0)).squeeze(0)
