@@ -18,12 +18,15 @@ class Cloud:
         self = Cloud.from_tensors(depth, intrinsic, extrinsic, ignore=ignore)
         return self
     
-    def update_data(self, depth, intrinsic, extrinsic, ignore='max'):
+    def update_data(self, depth, intrinsic, extrinsic, ignore='max', update_mask=True):
         self.depth = depth
         self.intrinsic = intrinsic
         self.extrinsic = extrinsic
-        self.unmasked_points, self.mask = self.extrude_cloud(depth, ignore)
-        self.points = self.unmasked_points[self.mask]    
+        if update_mask:
+            self.unmasked_points, self.mask = self.extrude_cloud(depth, ignore)
+        else:
+            self.unmasked_points, _ = self.extrude_cloud(depth, ignore)
+        self.points = self.unmasked_points[self.mask]
         
     @staticmethod
     def from_tensors(depth, intrinsic, extrinsic, ignore='max'):
