@@ -96,3 +96,29 @@ def optim_step_neighbors(pc1, pc2, params_old=None, max_iter=1000, neighbors_tak
     print('Extrinsics estimation...')
     params = align_pc(x.double(), y.double(), params_old, lam_min=0.01, lam_max=1, D=1, sigma=1e-5, max_iter=max_iter, verbose=verbose)
     return params
+
+
+def optim_step_neighbors(pc1, pc2, params_old=None, max_iter=1000, neighbors_take_each=1000, verbose=0):
+    R = pc2.extrinsic @ torch.inverse(pc1.extrinsic)
+    rot = R[:3,:3]
+    transl = R[:3,-1]
+
+    print('Correspondence set estimation...')
+    n_pts_1 = len(pc1.points)
+    pc1_pts_subset = pc1.points[::neighbors_take_each]
+    pc2_pts = pc2.points
+    # cdist = sp.spatial.distance.cdist(pcA_pts_subset, pcB_pts)
+    cdist = torch.cdist(pc1_pts_subset, pc2_pts)
+    reg_p2l = torch.argmin(cdist, axis=1)
+    
+    pc1_idx = torch.arange(n_pts_1)[::neighbors_take_each]
+    pc2_idx = reg_p2l
+
+    x = pc1.points[pc1_idx]
+    y = pc2.points[pc2_idx]
+
+    if params_old is None:
+        params_old = torch.DoubleTensor(6).fill_(0)
+    print('Extrinsics estimation...')
+    params = align_pc(x.double(), y.double(), params_old, lam_min=0.01, lam_max=1, D=1, sigma=1e-5, max_iter=max_iter, verbose=verbose)
+    return params
