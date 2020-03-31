@@ -7,4 +7,8 @@ functions fitting (exp and sin correspondingly). To see how it works, just do:
 
 python test_exp.py
 
-python test_sin.py  
+python test_sin.py
+
+## Data
+
+Synthetic data used in our experiments is available at: https://yadi.sk/d/Q3ZNqmq5UGEkcg
