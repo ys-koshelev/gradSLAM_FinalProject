@@ -99,9 +99,9 @@ class PoseEst(PoseFunctionBase):
         self.x = x
         self.y = y
         if init_params is None:
-            self.params = torch.rand()
+            self.params = torch.rand().to(x)
         else:
-            self.params = init_params
+            self.params = init_params.to(x)
 
     def value(self):
         return self.evaluate(self.x)

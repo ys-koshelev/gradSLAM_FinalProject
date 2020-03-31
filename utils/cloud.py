@@ -63,7 +63,7 @@ class Cloud:
         Intr = self.intrinsic
         M = th.inverse(Intr)
         H, W = dpth.shape
-        uv = get_coords_list(H, W)
+        uv = get_coords_list(H, W).to(dpth)
         uv *= dpth[..., None]
         uv = th.cat([uv, dpth[..., None]], dim=-1).flatten(start_dim=0, end_dim=1).unsqueeze(-1)
         M = M.unsqueeze(0).expand(uv.shape[0], 3, 3)
